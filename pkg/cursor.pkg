@@ -1,0 +1,14 @@
+SET SERVEROUTPUT ON;
+DECLARE
+	cidade LOCATIONS.CITY%TYPE;
+	CURSOR locs is SELECT CITY FROM LOCATIONS;
+BEGIN
+	OPEN locs;
+	LOOP 
+		FETCH locs into cidade;
+		EXIT WHEN locs%notfound;
+		dbms_output.put_line(cidade);
+	END LOOP;
+	CLOSE locs;
+	END;
+/
