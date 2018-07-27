@@ -5,7 +5,8 @@ FOR EACH ROW
 DECLARE	
 	ex EXCEPTION;
 BEGIN
-	IF MONTHS_BETWEEN(:OLD.hire_date, sysdate) <= 1 THEN
+	dbms_output.put_line(MONTHS_BETWEEN(sysdate, :OLD.hire_date));
+	IF MONTHS_BETWEEN(sysdate, :OLD.hire_date) <= 1 THEN
 		RAISE ex;
 	END IF;
 	EXCEPTION
