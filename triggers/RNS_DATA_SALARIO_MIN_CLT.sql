@@ -7,14 +7,14 @@ DECLARE
 	sal_min number(4) := 954;
 	trabalho JOBS%ROWTYPE;
 BEGIN
-	EXECUTE IMMEDIATE 'SELECT * FROM JOBS WHERE JOB_ID ="' || :OLD.JOB_ID  || '"'
-	INTO trabalho;
+	EXECUTE IMMEDIATE 'SELECT * FROM JOBS WHERE JOB_ID = :id'
+	INTO trabalho USING :OLD.JOB_ID ;
 	IF :NEW.SALARY < sal_min AND trabalho.contract_type = 'CLT' THEN
 		RAISE ex;
-	END IF;
+	END IF; 
 	EXCEPTION
 		WHEN ex THEN
-			RAISE_APPLICATION_ERROR(-20001, 'Contrato CLT e abaixo do salario minimo( ' || sal_min || ' ');
+			RAISE_APPLICATION_ERROR(-20001, 'Contrato CLT e abaixo do salario minimo(' || sal_min || ') ');
 END;
 /
 
