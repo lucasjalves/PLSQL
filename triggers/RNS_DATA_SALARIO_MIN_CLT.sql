@@ -1,0 +1,22 @@
+CREATE OR REPLACE TRIGGER RNS_DATA_SALARIO_MIN_CLT
+BEFORE UPDATE OF SALARY
+ON EMPLOYEES
+FOR EACH ROW
+DECLARE	
+	ex EXCEPTION;
+	sal_min number(4) := 954;
+	trabalho JOBS%ROWTYPE;
+BEGIN
+	EXECUTE IMMEDIATE 'SELECT * FROM JOBS WHERE JOB_ID ="' || :OLD.JOB_ID  || '"'
+	INTO trabalho;
+	IF :NEW.SALARY < sal_min AND trabalho.contract_type = 'CLT' THEN
+		RAISE ex;
+	END IF;
+	EXCEPTION
+		WHEN ex THEN
+			RAISE_APPLICATION_ERROR(-20001, 'Contrato CLT e abaixo do salario minimo( ' || sal_min || ' ');
+END;
+/
+
+	
+	
