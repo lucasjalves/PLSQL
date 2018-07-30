@@ -14,7 +14,6 @@ BEGIN
 		EXIT WHEN c_job%notfound;
 		IF trabalho.job_id = id_job THEN
 			salario_retorno := salario_empregado * 1.10;
-			DBMS_OUTPUT.put_line(salario_retorno || ' ' || trabalho.max_salary);
 			IF salario_retorno >= trabalho.max_salary THEN
 				salario_retorno := trabalho.max_salary;	
 			END IF;
