@@ -1,0 +1,23 @@
+CREATE OR REPLACE TRIGGER RNS_SALARIO_MAX
+BEFORE UPDATE OF SALARY
+ON EMPLOYEES
+FOR EACH ROW
+DECLARE	
+	ex EXCEPTION;
+	sal_min number(4) := 954;
+	trabalho JOBS%ROWTYPE;
+BEGIN
+	EXECUTE IMMEDIATE 'SELECT * FROM JOBS WHERE JOB_ID = :id'
+	INTO trabalho USING :OLD.JOB_ID ;
+	IF :NEW.SALARY > trabalho.max_salary THEN
+		RAISE ex;
+	END IF; 
+	EXCEPTION
+		WHEN ex THEN
+			RAISE_APPLICATION_ERROR(-20001, 'FOR ' || trabalho.job_title || ' MAX SALARY = ' 
+			|| trabalho.max_salary || ' WAS SET = ' || :NEW.SALARY);
+END;
+/
+
+	
+	
