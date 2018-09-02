@@ -1,38 +1,45 @@
 SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE TYPE collection_employees AS TABLE OF EMPLOYEES;
+/
+
 CREATE OR REPLACE FUNCTION fn_raise_salary
-	( id_job in VARCHAR2, salario_empregado in NUMBER)
-	RETURN NUMBER
+	(empregados in collection_employees)
+	RETURN collection_numbers
 IS
-	salario_retorno 	EMPLOYEES.SALARY%TYPE;
-	trabalho			JOBS%ROWTYPE;
-	cursor c_job is SELECT 
-	* FROM JOBS;
-BEGIN
-	OPEN c_job;
-	LOOP 
-		FETCH c_job INTO trabalho;
-		EXIT WHEN c_job%notfound;
-		IF trabalho.job_id = id_job THEN
-			salario_retorno := salario_empregado * 1.10;
-			IF salario_retorno >= trabalho.max_salary THEN
-				salario_retorno := trabalho.max_salary;	
-			END IF;
-		END IF;
-	END LOOP;
-	CLOSE c_job;
+	TYPE 		collection_numbers IS TABLE OF NUMBER;
+	TYPE 		collection_trabalhos IS TABLE OF JOBS%ROWTYPE;
+
+	empregados collection_employees;
+	trabalho	JOBS%ROWTYPE;
+	salario 	NUMBER;	
+	salarios 	collection_numbers;
+	jobs colection_trabalhos;
 	
-	RETURN salario_retorno;
+BEGIN
+	EXECUTE IMMEDIATE 'SELECT * FROM JOBS' INTO jobs;
+	FOR i IN 1 .. empregados.COUNT LOOP
+		salarios.EXTEND;
+		FOR j in 1 .. jobs.COUNT LOOP
+			IF empregados(i).job_id = jobs(j).job_id THEN
+				salario := empregados(i) * 1.10;
+				IF salario > jobs(j).max_salary THEN
+					salario := jobs(j).max_salary;
+				END IF;
+			END IF;
+		END LOOP;
+		salarios(i) := salario;
+	END LOOP;
+	
+	RETURN salarios;
 END fn_raise_salary;
 /
 
 DECLARE
-	TYPE collection_employees IS TABLE OF EMPLOYEES%ROWTYPE;
 	empregados collection_employees;
 	salario  EMPLOYEES.SALARY%TYPE;
 BEGIN
 	SELECT * BULK COLLECT INTO empregados FROM EMPLOYEES;
-	FORALL indx IN @upt
-		UPDATE EMPLOYEES emp
-			SET emp.salary = fn_raise_salary(empregados(indx).JOB_ID, empregados(indx).SALARY);
+	fn_raise_salary(empregados);
 END;
 /

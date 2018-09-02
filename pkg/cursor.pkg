@@ -11,4 +11,8 @@ BEGIN
 	END LOOP;
 	CLOSE locs;
 	END;
+	
+		FORALL indx IN 1 .. empregados.COUNT
+		UPDATE EMPLOYEES emp
+			SET salary = empregados(indx).salary * 1.10;
 /
